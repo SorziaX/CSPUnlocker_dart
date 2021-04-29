@@ -30,11 +30,13 @@ Future<void> unlock() async {
     srcFileAccess = await srcFile.open();
   }catch(e){
     print("打开文件失败");
+    return;
   }
   try{
     newFileAccess = await newFile.open(mode: FileMode.write);
   }catch(e){
     print("创建文件失败");
+    return;
   }
 
   //创建buffer
@@ -47,13 +49,12 @@ Future<void> unlock() async {
     bufferBytes.add(byte);
   }
 
-
   //循环对比
   do{
     if(replaceCount == 0 && compareList(bufferBytes,targetBytes)){
       //替换字节串
       replaceCount++;
-      print("[${bufferBytes.toRadix16String()}]  => [${replaceBytes.toRadix16String()}]");
+      print("[${bufferBytes.toBytesString()}]  => [${replaceBytes.toBytesString()}]");
       for(int i = 0;i < bytesLength;i++){
         byte = await srcFileAccess.readByteSync();
         await newFileAccess.writeByte(replaceBytes[i]);
@@ -147,7 +148,7 @@ String timeBakExt(){
 
 //字节串格式化输出扩展
 extension BytesList on List{
-    String toRadix16String()
+    String toBytesString()
     {
         String result = "";
         for (var byte in this) {
