@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:intl/intl.dart';
 
 void main() {
-  test();
+  unlock();
 }
 
 const NEW_FILE_EXTENSION = "new";
@@ -16,7 +16,7 @@ List<int> replaceBytes = new List<int>();
 int bytesLength = 0;
 int replaceCount = 0;
 
-Future<void> test() async {
+Future<void> unlock() async {
   //加载配置文件
   await loadConfig();
 
