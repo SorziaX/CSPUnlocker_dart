@@ -43,7 +43,7 @@ Future<void> test() async {
     if(replaceCount == 0 && compareList(bufferBytes,targetBytes)){
       //替换字节串
       replaceCount++;
-      print("$bufferBytes  => $replaceBytes");
+      print("${bufferBytes.toRadix16String()}  => ${replaceBytes.toRadix16String()}");
       for(int i = 0;i < bytesLength;i++){
         byte = await srcFileAccess.readByteSync();
         await newFileAccess.writeByte(replaceBytes[i]);
@@ -131,6 +131,19 @@ Future<String> availableBakExt(String fileName) async{
 //根据时间生成扩展名
 String timeBakExt(){
   var now = DateTime.now();
-  var formatter = new DateFormat("yyyy-MM-dd HH-mm-ss");
+  var formatter = new DateFormat("yyyy-MM-dd_HH-mm-ss");
   return "${BAK_FILE_EXTENSION}_${formatter.format(now)}";
+}
+
+
+extension BytesList on List{
+    String toRadix16String()
+    {
+        String result = "";
+        for (var byte in this) {
+          result += byte.toRadixString(16);
+        }
+
+        return result;
+    }
 }
