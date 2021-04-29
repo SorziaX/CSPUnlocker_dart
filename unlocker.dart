@@ -23,9 +23,19 @@ Future<void> unlock() async {
   //打开文件
   File srcFile = new File("$fileName.$fileExt");
   File newFile = new File("$fileName.$NEW_FILE_EXTENSION");
-  RandomAccessFile srcFileAccess = await srcFile.open();
-  RandomAccessFile newFileAccess = await newFile.open(mode: FileMode.write);
+  RandomAccessFile srcFileAccess;
+  RandomAccessFile newFileAccess;
 
+  try{
+    srcFileAccess = await srcFile.open();
+  }catch(e){
+    print("打开文件失败");
+  }
+  try{
+    newFileAccess = await newFile.open(mode: FileMode.write);
+  }catch(e){
+    print("创建文件失败");
+  }
 
   //创建buffer
   List<int> bufferBytes = new List<int>();
@@ -43,7 +53,7 @@ Future<void> unlock() async {
     if(replaceCount == 0 && compareList(bufferBytes,targetBytes)){
       //替换字节串
       replaceCount++;
-      print("${bufferBytes.toRadix16String()}  => ${replaceBytes.toRadix16String()}");
+      print("[${bufferBytes.toRadix16String()}]  => [${replaceBytes.toRadix16String()}]");
       for(int i = 0;i < bytesLength;i++){
         byte = await srcFileAccess.readByteSync();
         await newFileAccess.writeByte(replaceBytes[i]);
@@ -135,7 +145,7 @@ String timeBakExt(){
   return "${BAK_FILE_EXTENSION}_${formatter.format(now)}";
 }
 
-
+//字节串格式化输出扩展
 extension BytesList on List{
     String toRadix16String()
     {
