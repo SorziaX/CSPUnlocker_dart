@@ -1,8 +1,31 @@
 import 'dart:io';
 import 'package:intl/intl.dart';
 
-void main() {
-  unlock();
+Future<int> main() async{
+  int result = 1;
+  try{
+    result = await unlock();
+  }catch(e){
+    result = 1;
+  }
+
+  String msg;
+  switch(result){
+    case 0:
+      msg = "成功，按任意键结束";
+      break;
+    case 1:
+      msg = "失败，按任意键结束";
+      break;
+    default:
+      msg = "失败，按任意键结束";
+      break;
+  }
+  
+  print(msg);
+  String input = stdin.readLineSync();
+
+  return result;
 }
 
 const NEW_FILE_EXTENSION = "new";
@@ -16,7 +39,7 @@ List<int> replaceBytes = new List<int>();
 int bytesLength = 0;
 int replaceCount = 0;
 
-Future<void> unlock() async {
+Future<int> unlock() async {
   //加载配置文件
   await loadConfig();
 
@@ -30,13 +53,13 @@ Future<void> unlock() async {
     srcFileAccess = await srcFile.open();
   }catch(e){
     print("打开文件失败");
-    return;
+    return 1;
   }
   try{
     newFileAccess = await newFile.open(mode: FileMode.write);
   }catch(e){
     print("创建文件失败");
-    return;
+    return 1;
   }
 
   //创建buffer
@@ -89,6 +112,8 @@ Future<void> unlock() async {
   String bakFileExt = await timeBakExt();
   await srcFile.rename("$fileName.$bakFileExt");
   await newFile.rename("$fileName.$fileExt");
+
+  return 0;
 }
 
 //对比字节串
