@@ -116,8 +116,8 @@ Future<int> unlock() async {
     }
 
     page++;
-    if(page % 1000 == 0)
-      printToCMD("过程: ${page/1000} * 1000KB");
+    //if(page % 1000 == 0)
+    //  printToCMD("过程: ${page/1000} * 1000KB");
 
   }while(page*BUFFER_LENGTH < lengthOfFile);
   
