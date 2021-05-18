@@ -5,14 +5,14 @@ packages:
     dependency: "direct main"
     description:
       name: intl
-      url: "https://pub.dartlang.org"
+      url: "https://dart-pub.byted.org"
     source: hosted
     version: "0.16.1"
   path:
     dependency: transitive
     description:
       name: path
-      url: "https://pub.dartlang.org"
+      url: "https://dart-pub.byted.org"
     source: hosted
     version: "1.8.0"
 sdks:

@@ -3,37 +3,39 @@ import 'dart:typed_data';
 import 'dart:math' as math;
 import 'package:intl/intl.dart';
 
+var Error_Messages = () => {
+  0 : "区域解锁成功",
+  1 : "错误:文件:$fileName.$fileExt无法识别 或 已经解锁过",
+  2 : "错误:文件:$fileName.$fileExt无法打开",
+  3 : "备份文件无法创建，请检查文件夹以及执行权限",
+};
+
 Future<int> main() async{
-  int result = 1;
+  String msg;
+  int result = 0;
   try{
     result = await unlock();
-  }catch(e){
-    printToCMD("$e");
-    result = 1;
+  }catch(error){
+    result = 999;
+    msg = "$error";
   }
 
-  String msg;
   switch(result){
-    case 0:
-      msg = "成功，按任意键结束";
-      break;
-    case 1:
-      msg = "失败，按任意键结束";
+    case 999:
+      print("$result $msg");
       break;
     default:
-      msg = "失败1，按任意键结束";
+      print("$result");
+      msg = Error_Messages()["$result"];
       break;
   }
   
-  print(msg);
-  String input = stdin.readLineSync();
-
   return result;
 }
 
 const NEW_FILE_EXTENSION = "new";
 const BAK_FILE_EXTENSION = "bak";
-const CONFIG_FILE_PATH = "csp_unlocker.conf ";
+const CONFIG_FILE_PATH = "csp_unlocker.conf";
 const BUFFER_LENGTH = 1000;
 
 String fileName = "";
@@ -59,19 +61,19 @@ Future<int> unlock() async {
     srcFileAccess = await srcFile.open();
   }catch(e){
     print("打开文件失败");
-    return 1;
+    return 2;
   }
   try{
     newFileAccess = await newFile.open(mode: FileMode.write);
   }catch(e){
     print("创建文件失败");
-    return 1;
+    return 3;
   }
 
   //创建buffer
   Uint8List bufferBytes;
   int bufferi = 0;
-  int byte = 0;
+  bool hasReplaced = false;
 
   //循环对比
   int page = 0;
@@ -95,29 +97,35 @@ Future<int> unlock() async {
     }
 
     bool matched = false;
-    for(bufferi = 0;bufferi < lengthOfRead;bufferi++){
-      if(compareBufferList(bufferBytes,targetBytes,bufferi)){
-        //byte = await srcFileAccess.readByteSync();
-        //await newFileAccess.writeByte(replaceBytes[i]);
-        print("[${List<int>.from(bufferBytes.getRange(bufferi,bufferi+bytesLength)).toBytesString()}]  => [${replaceBytes.toBytesString()}]");
-        
-        matched = true;
-        break;
+    //因为替换只做一次，只哟没有替换过的情况下才循环对比
+    //已替换过就跳过对比逻辑，永远都不会匹配:matched = false
+    if(hasReplaced == false){
+      for(bufferi = 0;bufferi < lengthOfRead;bufferi++){
+        if(compareBufferList(bufferBytes,targetBytes,bufferi)){
+          //print("[${List<int>.from(bufferBytes.getRange(bufferi,bufferi+bytesLength)).toBytesString()}]  => [${replaceBytes.toBytesString()}]");
+          matched = true;
+          hasReplaced = true;
+          break;
+        }
       }
     }
 
+    //判断匹配
     if(matched){
+      //匹配情况下，分三部分写入
       newFileAccess.writeFromSync(bufferBytes,0,bufferi);
       newFileAccess.writeFromSync(replaceBytes,0,bytesLength);
       newFileAccess.writeFromSync(bufferBytes,bufferi + bytesLength,bufferBytes.length);
+      //由于将当前吧buffer所有都写入新文件，没有预留最后bytelength长度，所以将文件浮标相应后移bytelength
       srcFileAccess.setPositionSync(srcFileAccess.positionSync() + bytesLength);
     }else{
+      //不匹配，直接将buffer写入文件（如果不是最后一串buffer，需尾部预留bytelength长度）
       newFileAccess.writeFromSync(bufferBytes,0,(isLast ? bufferBytes.length : lengthOfRead) - (isFirst ? bytesLength : 0));
     }
 
     page++;
-    //if(page % 1000 == 0)
-    //  printToCMD("过程: ${page/1000} * 1000KB");
+    if(page % 1000 == 0)
+      printToCMD("过程: ${page/1000} * 1000KB");
 
   }while(page*BUFFER_LENGTH < lengthOfFile);
   
@@ -131,7 +139,10 @@ Future<int> unlock() async {
   await srcFile.rename("$fileName.$bakFileExt");
   await newFile.rename("$fileName.$fileExt");
 
-  return 0;
+  if(hasReplaced)
+    return 0;
+  else
+    return 1;
 }
 
 //对比字节串
@@ -157,7 +168,6 @@ bool compareBufferList(List<int> list1,List<int> list2,int index1){
 //读取配置文件
 void loadConfig() async{
   File config = new File(CONFIG_FILE_PATH);
-
   List<String> list = await config.readAsLines();
   String targetFileName = list[0];
   int dotIndex = targetFileName.lastIndexOf('.');
@@ -200,7 +210,7 @@ String timeBakExt(){
 }
 
 void printToCMD(String msg){
-  print(msg);
+  //print(msg);
 }
 
 //字节串格式化输出扩展
