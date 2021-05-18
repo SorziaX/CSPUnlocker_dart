@@ -8,6 +8,7 @@ var Error_Messages = () => {
   1 : "错误:文件:$fileName.$fileExt无法识别 或 已经解锁过",
   2 : "错误:文件:$fileName.$fileExt无法打开",
   3 : "备份文件无法创建，请检查文件夹以及执行权限",
+  4 : "找不到配置文件:CONFIG_FILE_PATH",
 };
 
 Future<int> main() async{
@@ -47,7 +48,11 @@ int replaceCount = 0;
 
 Future<int> unlock() async {
   //加载配置文件
-  await loadConfig();
+  try{
+    await loadConfig();
+  }catch(e){
+    return 4;
+  }
   
   printToCMD("读取配置文件完毕，目标:${targetBytes.toBytesString()}");
 
@@ -60,13 +65,11 @@ Future<int> unlock() async {
   try{
     srcFileAccess = await srcFile.open();
   }catch(e){
-    print("打开文件失败");
     return 2;
   }
   try{
     newFileAccess = await newFile.open(mode: FileMode.write);
   }catch(e){
-    print("创建文件失败");
     return 3;
   }
 
