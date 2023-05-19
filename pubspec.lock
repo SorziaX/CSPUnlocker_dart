@@ -5,15 +5,15 @@ packages:
     dependency: "direct main"
     description:
       name: intl
-      url: "https://dart-pub.byted.org"
+      url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.1"
   path:
     dependency: transitive
     description:
       name: path
-      url: "https://dart-pub.byted.org"
+      url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.0"
+    version: "1.8.3"
 sdks:
-  dart: ">=2.12.0-0 <3.0.0"
+  dart: ">=2.12.0 <3.0.0"

@@ -3,3 +3,4 @@
 .dart_tool/
 out/unlocker
 out/unlocker/*.bak*
+out/
